@@ -24,6 +24,10 @@ app.get('/:name', (req, res) => {
     }
 });
 
+app.get('*', (req, res) => {
+    res.redirect('/');
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
