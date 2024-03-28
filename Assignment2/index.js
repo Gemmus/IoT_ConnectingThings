@@ -8,7 +8,6 @@ const app = express();
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
-// Create variables for MQTT use here
 
 app.use(bodyParser.json());
 function read(filePath = './message.json') {
@@ -18,27 +17,28 @@ function write(data, filePath = './message.json') {
     return writeFile(path.resolve(__dirname, filePath), JSON.stringify(data));
 }
 
-// create an MQTT instance
-const ssid = "KME662";
-const password = "SmartIot";
-const broker_address = "mqtt://192.168.1.254";
+                    //////////////////////////////////////////////////////////////////////
+                    //                               MQTT                               //
+                    //////////////////////////////////////////////////////////////////////
 
+// Create variables for MQTT use here
+const broker_address = 'mqtt://18.198.188.151:21883';
+
+// Create an MQTT instance
 const options = {
-    clientId: 'gemma-server',
-    username: ssid,
-    password: password
+    clientId: Math.random().toString(36).substring(2, 16),
 }
 
-const mqttClient = mqtt.connect(broker_address, options);
+const mqttClient = mqtt.connect(broker_address,  options);
 
 // Check that you are connected to MQTT and subscribe to a topic (connect event)
 mqttClient.on('connect', () => {
     console.log('Connected to MQTT broker');
-    mqttClient.subscribe('metro-messenger', (err) => {
+    mqttClient.subscribe('gemma', (err) => {
         if (err) {
             console.error('Failed to subscribe to MQTT topic:', err);
         } else {
-            console.log('Subscribed to MQTT topic: metro-messenger');
+            console.log('Subscribed to MQTT topic: gemma');
         }
     });
 });
@@ -51,11 +51,13 @@ mqttClient.on('error', (err) => {
 // Handle when a subscribed message comes in (message event)
 mqttClient.on('message', (topic, message) => {
     console.log('Received message:', message.toString());
-    // Handle incoming messages here, you may want to update the message list
-    // and send updates to connected clients via WebSockets or other means
 });
 
 app.use(bodyParser.json());
+
+                    //////////////////////////////////////////////////////////////////////
+                    //                             EXPRESS                              //
+                    //////////////////////////////////////////////////////////////////////
 
 // Route to serve the home page
 app.get('/', (req, res) => {
