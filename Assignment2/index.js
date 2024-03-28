@@ -29,7 +29,7 @@ const options = {
     clientId: Math.random().toString(36).substring(2, 16),
 }
 
-const mqttClient = mqtt.connect(broker_address,  options);
+const mqttClient = mqtt.connect(broker_address, options);
 
 // Check that you are connected to MQTT and subscribe to a topic (connect event)
 mqttClient.on('connect', () => {
@@ -49,8 +49,16 @@ mqttClient.on('error', (err) => {
 });
 
 // Handle when a subscribed message comes in (message event)
-mqttClient.on('message', (topic, message) => {
-    console.log('Received message:', message.toString());
+mqttClient.on('message', async (topic, message) => {
+    const msg = JSON.parse(message.toString());
+    console.log('Received message:', msg);
+    const newMessage = {
+        id: Math.random().toString(36).substring(2, 8),
+        msg
+    };
+    const messages = await read() || [];
+    messages.push(newMessage);
+    await write(messages);
 });
 
 app.use(bodyParser.json());
@@ -100,17 +108,9 @@ app.get('/:id', async (req, res) => {
 app.post('/', async (req, res) => {
     try {
         const { topic, msg } = req.body;
-        const newMessage = {
-            id: Math.random().toString(36).substring(2, 8),
-            msg
-        };
-        const messages = await read() || [];
-        messages.push(newMessage);
-        await write(messages);
 
         // Publish the new message to MQTT broker
-        mqttClient.publish('metro-messenger', JSON.stringify(newMessage));
-
+        mqttClient.publish('gemma', JSON.stringify(msg));
         res.sendStatus(200);
     } catch (error) {
         console.error('Error creating message:', error);
