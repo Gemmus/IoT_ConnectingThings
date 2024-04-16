@@ -61,15 +61,15 @@ using json = nlohmann::json;
 
 // Network settings
 #if 0
-#define SSID "Nadim"
-#define PASSWORD "ABCDEFGH"
-#define IP_ADDRESS "18.198.188.151"
-#define PORT 21883
+#define SSID ""     	// Fill in
+#define PASSWORD ""		// Fill in
+#define IP_ADDRESS ""   // Fill in
+#define PORT 21883		// Change
 #else
-#define SSID "Starbase"
-#define PASSWORD "u7kLy-1sAt8vF4R"
-#define IP_ADDRESS "192.168.1.153"
-#define PORT 1883
+#define SSID ""			// Fill in
+#define PASSWORD ""		// Fill in
+#define IP_ADDRESS ""	// Fill in
+#define PORT 1883 		// Change
 #endif
 
 // Initialize LED objects
