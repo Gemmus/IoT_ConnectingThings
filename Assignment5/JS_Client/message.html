@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MetroMessenger</title>
+    <!--    <link rel="stylesheet" href="style/style.css">-->
+</head>
+<body>
+<header>
+    <a href="/"><h1>MetroMessenger</h1></a>
+    <a href="/add">Add a Message</a>
+</header>
+<main>
+    <form id="add-form" method="post">
+        <label for="topic-input">Topic</label>
+        <input id="topic-input" type="text" name="topic" placeholder="Topic" required>
+        <label for="message-input">Message</label>
+        <input id="message-input" type="text" name="msg" placeholder="New message" required>
+        <input type="submit" value="Add a message">
+    </form>
+    <script>
+        const form = document.getElementById('add-form');
+        const submit = document.querySelector('input[type="submit"]');
+        (() => {
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                console.log(form.msg.value);
+                fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        topic:form.topic.value,
+                        msg: form.msg.value
+                    })
+
+                })
+                    .then(res => {
+                        if (res.status !== 200) {
+                            return Promise.reject(res.text());
+                        }
+                        window.location.href = '/add';
+                    })
+                    .catch(err => console.error(err));
+            });
+        }).call({});
+    </script>
+</main>
+</body>
+</html></html>
