@@ -61,15 +61,15 @@ using json = nlohmann::json;
 
 // Network settings
 #if 0
-#define SSID ""     	// Fill in
+#define SSID ""			// Fill in
 #define PASSWORD ""		// Fill in
-#define IP_ADDRESS ""   // Fill in
+#define IP_ADDRESS ""	// Fill in
 #define PORT 21883		// Change
 #else
 #define SSID ""			// Fill in
 #define PASSWORD ""		// Fill in
 #define IP_ADDRESS ""	// Fill in
-#define PORT 1883 		// Change
+#define PORT 1883		// Change
 #endif
 
 // Initialize LED objects
@@ -78,12 +78,10 @@ static LED D2(LED_D2);
 static LED D1(LED_D1);
 
 // Global variables
-static const char *topic = "gemma/temp";
-
-volatile bool publishTempMsg = false;
-
-static volatile uint8_t min_temp = 20; // Below: D1 ON
-static volatile uint8_t max_temp = 30; // Above: D3 ON
+static const char *topic = "gemma/temp";        // TO CHANGE: subscribed topic
+static volatile bool publishTempMsg = false;    // Flag to publish message
+static volatile int min_temp = 20;              // Below: D1 ON
+static volatile int max_temp = 30;              // Above: D3 ON
 
 // Function declarations
 bool repeatingTimerCallback(struct repeating_timer *t);
@@ -213,19 +211,17 @@ int main() {
         double temperature = 27 - (ADC_voltage - 0.706) / 0.001721;
         printf("Temp: %.2f C, Read: %d\n", temperature, read_value);
 
-        /* D1 ON, if temp is below threshold  */
+        /* D1, D3: ON or OFF based on threshold values */
         if (temperature < min_temp) {
             D1.on();
-        } else {
+        } else if (temperature >= min_temp) {
             D1.off();
-        }
-
-        /* D3 ON, if temp is above threshold */
-        if (temperature > max_temp) {
+        } else if (temperature > max_temp) {
             D3.on();
-        } else {
+        } else if (temperature <= max_temp) {
             D3.off();
         }
+
         sleep_ms(1000);
 #if 1
         if (publishTempMsg) {
@@ -278,25 +274,16 @@ void messageArrived(MQTT::MessageData &md) {
     json j = json::parse(payload);
     // Extract the 'msg' part
     std::string received_message = j["msg"];
-    std::cout << "Extracted message: " << received_message << std::endl;
 
-    /// Check the received message and take appropriate actions
+    // Check the received message and take appropriate actions
     if (received_message == "temp") {
-        // Retrieve temperature from the Pico and publish it back to the appropriate topic
-        publishTempMsg = true;
-    } else if (received_message.find("High:") == 0) {
-        // Extract the high alarm temperature value
-        std::string tempValue = received_message.substr(5);
-        // Convert the temperature value to float
-        int highTemp = std::stof(tempValue);
-        std::cout << highTemp << std::endl;
-    } else if (received_message.find("Low:") == 0) {
-        // Extract the low alarm temperature value
-        std::string tempValue = received_message.substr(4);
-        // Convert the temperature value to float
-        int lowTemp = std::stof(tempValue);
-        // Set the low alarm temperature
-        std::cout << lowTemp << std::endl;
+        publishTempMsg = true;  // Set flag to send out message
+    } else if (received_message.compare(0, 5, "High:") == 0) {
+        max_temp = std::stoi(received_message.substr(5));
+        std::cout << "New max_temp: " << max_temp << std::endl;
+    } else if (received_message.compare(0, 4, "Low:") == 0) {
+        min_temp = std::stoi(received_message.substr(4));
+        std::cout << "New min_temp: " << min_temp << std::endl;
     }
 
     // Clear the payload buffer
