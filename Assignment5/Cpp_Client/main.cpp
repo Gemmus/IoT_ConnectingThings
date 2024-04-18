@@ -60,16 +60,16 @@ using json = nlohmann::json;
 #define MAX_BUFFER_SIZE 128
 
 // Network settings
-#if 0
-#define SSID ""			// Fill in
-#define PASSWORD ""		// Fill in
-#define IP_ADDRESS ""	// Fill in
-#define PORT 21883		// Change
+#if 1
+#define SSID ""                             // Fill in
+#define PASSWORD ""                         // Fill in
+#define IP_ADDRESS "18.198.188.151"         // Fill in
+#define PORT 21883                          // Fill in
 #else
-#define SSID ""			// Fill in
-#define PASSWORD ""		// Fill in
-#define IP_ADDRESS ""	// Fill in
-#define PORT 1883		// Change
+#define SSID ""                             // Fill in
+#define PASSWORD ""                         // Fill in
+#define IP_ADDRESS "18.198.188.151"         // Fill in
+#define PORT 21883                          // Fill in
 #endif
 
 // Initialize LED objects
@@ -214,11 +214,13 @@ int main() {
         /* D1, D3: ON or OFF based on threshold values */
         if (temperature < min_temp) {
             D1.on();
-        } else if (temperature >= min_temp) {
+        } else {
             D1.off();
-        } else if (temperature > max_temp) {
+        }
+
+        if (temperature > max_temp) {
             D3.on();
-        } else if (temperature <= max_temp) {
+        } else {
             D3.off();
         }
 
